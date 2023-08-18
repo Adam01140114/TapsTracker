@@ -54,13 +54,20 @@
 		#contribute {
 			padding: 15px;
             border: 2px solid lightblue;
+			width: 80%;
+        }
+		
+		#feedback {
+			padding: 15px;
+            border: 2px solid lightblue;
+			width: 80%;
         }
 		
 		#venmo {
 		
 			padding: 0px;
             border: 2px solid lightblue;
-			width: 30%;
+			width: 80%;
 			height: fit-content;
         }
 
@@ -83,20 +90,23 @@
 
 <body>
     <div id="title">
-        <h2><b>TAPS Tracker</b></h2>
+        <h1><b>TAPS Tracker</b></h2>
     </div>
 	
 	
 
 	
-    <h2><u>Recent Sightings</u></h2>
+    <h1><u>Recent Sightings</u></h1>
 	
     <div id="sightings"></div>
     <button onclick="toggleSightings()">Show more</button>
 	<br><br>
 	
-	<p><h2><u>Report A Sighting</u></h2></p>
-	<p><h3><center> Select A Location On The Map To Report It <br> Once you report a sighting it will show up in "Recent Sightings" section above </center></h3><p>
+	<p><h1><u>Report A Sighting </u></h1></p>
+	
+	<p><h2><center> Select A Location On The Map To Report It </h2></p>
+	<p><h3> Once you report a sighting it will show up in the "Recent Sightings" section above </center></h3></h2></p>
+	
 
 	<br>
 	<div id="map"></div>
@@ -106,10 +116,19 @@
 	<br>
 	<center>
 	<h2><u>Contribute To The Cause</u></h2>
-	<p><h3> If you're interested in making the site better, the code is completly open source: </h3> </p>
 	<a href="https://github.com/Adam01140114/TapsTracker">https://github.com/Adam01140114/TapsTracker</a>
-	<br><br><br><br><br><p></p>
+	<br><br><br><br><p></p>
 	</div>
+	
+	<br>
+	<div id="feedback">
+	<br>
+	<center>
+	<h2><u>Make Suggestions For Improvment</u></h2>
+	<a href="https://forms.gle/cvdz4TtYh6t3P36m6">https://forms.gle/cvdz4TtYh6t3P36m6</a>
+	<br><br><br><br><p></p>
+	</div>
+	
 	
     
 	<br><br>
@@ -269,24 +288,49 @@ service cloud.firestore {
 			];
         
         function initMap() {
-		map = new google.maps.Map(document.getElementById('map'), {
-        center: { lat: 36.995236, lng: -122.059206 },
+    map = new google.maps.Map(document.getElementById('map'), {
         zoom: 15.5
     });
 
-            for (let i = 0; i < colleges.length; i++) {
-                let college = colleges[i];
-                let marker = new google.maps.Marker({
-                    position: { lat: college.lat, lng: college.lng },
-                    map: map,
-                    title: college.name
-                });
-                marker.addListener('click', function () {
-                    reportSighting(college.name);
-                });
-                markers.push(marker);
-            }
-        }
+    // Check if Geolocation is supported
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            var pos = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude
+            };
+
+            // Center the map to user's position
+            map.setCenter(pos);
+        }, function() {
+            handleLocationError(true, map.getCenter());
+        });
+    } else {
+        // Browser doesn't support Geolocation
+        handleLocationError(false, map.getCenter());
+    }
+
+    for (let i = 0; i < colleges.length; i++) {
+        let college = colleges[i];
+        let marker = new google.maps.Marker({
+            position: { lat: college.lat, lng: college.lng },
+            map: map,
+            title: college.name
+        });
+        marker.addListener('click', function () {
+            reportSighting(college.name);
+        });
+        markers.push(marker);
+    }
+}
+
+function handleLocationError(browserHasGeolocation, pos) {
+    alert(browserHasGeolocation ?
+        'Error: The Geolocation service failed.' :
+        'Error: Your browser doesn\'t support geolocation.');
+    map.setCenter(pos);
+}
+
 
         function reportSighting(collegeName, markerPosition) {
     const confirmation = window.confirm(`Do you want to report a TAPS sighting at ${collegeName}?`);
@@ -304,7 +348,7 @@ service cloud.firestore {
         function displaySightings() {
             const container = document.getElementById('sightings');
             container.innerHTML = '';
-            let data = showingAll ? allSightings.slice(0, 50) : allSightings.slice(0, 5);
+            let data = showingAll ? allSightings.slice(0, 20) : allSightings.slice(0, 5);
             data.forEach(sighting => {
                 if (sighting.time) {
                     let div = document.createElement('div');
