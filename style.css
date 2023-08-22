@@ -30,13 +30,7 @@ body {
   color: white;
   text-shadow: 4px 4px 10px #00000070
 }
-.topper {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: baseline;
-  width: 100%;
-}
+
 .btn-std {
   width: 150px;
   background-image: linear-gradient(
@@ -68,20 +62,30 @@ body {
   background-image: linear-gradient(
     to bottom right,
     rgba(7, 62, 111, 1),
-    rgba(7, 76, 138, 0.93)
+    rgb(5 36 85)
   );
+}
+.section{
+  display: flex;
+  flex-direction: row;
+  width: 80%;
+}
+.big{
+  width: 60%;
+}
+.small{
+  width: 30%;
 }
 .inner-content {
   font-family: 'Bellota Text';
   margin: 20px;
-  width: 60%;
   background-color: white;
   border-radius: 30px;
   padding: 20px;
   display: flex;
   align-items: center;
   flex-direction: column;
-  justify-content: center;
+  
   box-shadow: 8px 8px 30px #00000070;
 }
 #title {
@@ -92,14 +96,7 @@ body {
   margin-top: 10px;
 }
 
-#sightings {
-  margin-top: 5px;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  flex-wrap: wrap;
-}
+
 
 #report {
   margin-top: 20px;
@@ -128,9 +125,10 @@ button {
 
 .map{
   border: 2px solid lightblue;
-  height: 900px;
   width: 80%;
+  aspect-ratio: 1/1;
   margin: 0px auto;
+  
 }
 .blk{
   color: black;
@@ -156,4 +154,78 @@ button {
   flex-direction: column;
   color: white;
   align-items: center;
+}
+
+.main{
+  background-color: #EDEDED;
+  
+  width: 100%;
+  align-items: flex-start;
+  flex-direction: column;
+  justify-content: flex-start;
+  border-radius: 30px;
+  position: relative;
+  z-index: 1;
+}
+
+.bold{
+  font-weight:bold;
+}
+.topper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin: 20px 0px 20px 0px;
+}
+.drop{
+  position: relative;
+  top:-30px;
+  padding-top:35px;
+  padding-bottom: 5px;
+  background-color: #F8F8F8;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0px 0px 10px 10px;
+
+}
+.day{
+  width: 40%;
+  background-color: white;
+  border-radius: 12px;
+  margin: 5px;
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+}
+.drop_wrapper{
+  width: 100%;
+}
+.row{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  width: 100%;
+}
+
+.dropmenu{
+  flex-direction: column;
+  width: 90%;
+
+}
+.item{
+  margin:6px;
+  width: 85%;
+  background-color: white;
+  border-radius: 10px;
+  padding:15px;
+}
+
+.flex{
+  display: flex;
 }
