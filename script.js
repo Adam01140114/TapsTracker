@@ -49,9 +49,21 @@ let map2;
 var colleges = [
 
 
-	{name: "152 CROWN - MERRILL APARTMENTS ", lat: 7.002128, lng: -122.053512 },
+	{name: "152 CROWN - MERRILL APARTMENTS", lat: 7.002128, lng: -122.053512 },
+	{name: "154 CROWN - MERRILL APARTMENTS", lat: 37.002163, lng: -122.054817 },
+	{name: "111B CROWN COLLEGE CIRCLE", lat: 37.001089, lng: -122.054401 },
+	{name: "111A CROWN COLLEGE CIRCLE", lat: 37.000628, lng: -122.054770 },
+	{ name: "MERRILL COLLEGE APTS", lat: 36.999681, lng: -122.051747 },
+	{ name: "CROWN SERVICE ROAD", lat: 37.000602, lng: -122.054672 },
+	{ name: "FARM CASFS", lat: 36.985346, lng: -122.055503 },
+	{ name: "168 AGROECOLOGY", lat: 36.985335, lng: -122.055504},
+	{ name: "169 AGROECOLOGY", lat: 36.986809, lng: -122.055375 },
+	{name: "170 HAY BARN", lat: 36.981037, lng: -122.054451 },
+	{name: "105 UNIVERSITY POLICE", lat: 36.979614, lng: -122.052061 },
+	{name: "116 CAMPUS FACILITIES", lat: 36.980995, lng: -122.051875 },
 	
 	
+	{name: "170 HAY BARN", lat: 36.981037, lng: -122.054451 },
     { name: "Cowell Lot 106", lat: 36.99828, lng: -122.053877 },
     { name: "Cowell Lot 107", lat: 36.997918, lng: -122.053193 },
     { name: "Cowell Lot 108", lat: 36.997613, lng: -122.052994 },
@@ -117,6 +129,7 @@ var colleges = [
     { name: "College 10 Lot 167", lat: 37.003277, lng: -122.058957 },
 
     { name: "College 9 Lot 166", lat: 37.001763, lng: -122.057817 },
+
 
 ];
 

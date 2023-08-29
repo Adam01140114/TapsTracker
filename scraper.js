@@ -18,37 +18,34 @@ async function scrapeCitation(citationNumber) {
         const $ = cheerio.load(response.data);
         const location = $('#txtVioLocation').text();
         const date = $('#txtCiteDate').text();
-        const time = $('#txtCiteTime').text(); // <-- This line extracts the time
+        const time = $('#txtCiteTime').text();
 
         // Check if location, date, or time are empty (indicating a possible non-existent citation)
         if (!location || !date || !time) {
-            console.log('All done');
-            return false; // Stop the loop
+            console.log(`${citationNumber} doesn't exist`);
+            return true; // Continue with the loop since we only want to skip
         }
 
         // Store data to Firebase
         await db.collection('citations').doc(`${citationNumber}`).set({
             college: location,
             timestamp: date,
-            time: time  // <-- This line stores the time to Firebase
+            time: time
         });
 
         console.log(`Stored citation #${citationNumber}`);
         return true; // Continue the loop
     } catch (error) {
         console.error(`Error scraping citation #${citationNumber}: ${error}`);
-        return false; // Stop the loop in case of an error
+        return true; // Continue the loop even if there's an error
     }
 }
 
-
-async function startScraping(startingCitation) {
-    let currentCitation = startingCitation;
-    let shouldContinue = true;
-    while (shouldContinue) {
-        shouldContinue = await scrapeCitation(currentCitation);
-        currentCitation++;
+async function startScraping(startingCitation, endingCitation) {
+    for (let currentCitation = startingCitation; currentCitation <= endingCitation; currentCitation++) {
+        await scrapeCitation(currentCitation);
     }
+    console.log('Scraping process completed.');
 }
 
-startScraping(400126332);
+startScraping(400126132, 400126499);
