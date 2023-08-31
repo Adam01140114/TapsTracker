@@ -37,14 +37,15 @@ async function scrapeCitation(citationNumber) {
         throw e;
     }
 
-    const [dateElement, timeElement, dayElement, locationElement] = await Promise.all([
+    const [dateElement, timeElement, dayElement, locationElement, citeNumberElement] = await Promise.all([
         page.$('#txtCiteDate'),
         page.$('#txtCiteTime'),
         page.$('#txtDayOftheWeek'),
-        page.$('#txtVioLocation')
+        page.$('#txtVioLocation'),
+        page.$('#txtCiteNumber')
     ]);
 
-    if (!dateElement || !timeElement || !dayElement || !locationElement) {
+    if (!dateElement || !timeElement || !dayElement || !locationElement || !citeNumberElement) {
         console.error(`Unable to fetch data for citation #${citationNumber}`);
         await browser.close();
         return;
@@ -54,12 +55,14 @@ async function scrapeCitation(citationNumber) {
     const time = await timeElement.evaluate(el => el.textContent);
     const day = await dayElement.evaluate(el => el.textContent);
     const location = await locationElement.evaluate(el => el.textContent);
+    const citeNumber = await citeNumberElement.evaluate(el => el.textContent);
 
     await db.collection('citations').doc(`${citationNumber}`).set({
-        citationDate: date,
-        citationTime: time,
+        timestamp: date,
+        time: time,
         citationDay: day,
-        citationLocation: location
+        college: location,
+        citationNumber: citeNumber
     });
 
     await browser.close();
