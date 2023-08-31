@@ -9,48 +9,61 @@ admin.initializeApp({
 const db = admin.firestore();
 
 async function scrapeCitation(citationNumber) {
-    const initialURL = `https://www.paymycite.com/SearchAgency.aspx?agency=147&plate=&cite=${citationNumber}`;
     const browser = await puppeteer.launch({ headless: "new" });
     const page = await browser.newPage();
 
-    try {
-        await page.goto(initialURL, { waitUntil: 'networkidle2', timeout: 30000 });
-        const contestButton = await page.$("#DataGrid1_ctl02_cmdContest");
+    const url = `https://www.paymycite.com/SearchAgency.aspx?agency=147&plate=&cite=${citationNumber}`;
+    await page.goto(url, { waitUntil: 'domcontentloaded' });
 
-        if (!contestButton) {
-            console.log(`${citationNumber} already contested`);
-            await browser.close();
-            return;
-        }
+    const button = await page.$('#DataGrid1_ctl02_cmdContest');
 
-        await contestButton.click();
-        await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 10000 });
-
-        const location = await page.$eval('#txtVioLocation', el => el.innerText);
-        const date = await page.$eval('#txtCiteDate', el => el.innerText);
-        const time = await page.$eval('#txtCiteTime', el => el.innerText);
-        const citationDay = await page.$eval('#txtDayOftheWeek', el => el.innerText); // Extracting citation day
-
-        if (!location || !date || !time) {
-            console.log(`${citationNumber} doesn't have required data`);
-            await browser.close();
-            return;
-        }
-
-        await db.collection('citations').doc(`${citationNumber}`).set({
-            college: location,
-            timestamp: date,
-            time: time,
-            citationNumber: citationNumber,
-            citationDay: citationDay  // Added this line to store citation day
-        });
-
-        console.log(`Stored citation ${citationNumber}`);
-    } catch (error) {
-        console.log(`Error processing citation ${citationNumber}: ${error.message}`);
-    } finally {
+    if (!button) {
+        console.error(`[${citationNumber}] does not have a button`);
         await browser.close();
+        return;
     }
+
+    try {
+        await Promise.all([
+            button.click(),
+            page.waitForNavigation({ timeout: 5000 })
+        ]);
+    } catch (e) {
+        if (e instanceof puppeteer.errors.TimeoutError) {
+            console.error(`[${citationNumber}] Navigation timeout after clicking the button. Moving to the next citation.`);
+            await browser.close();
+            return;
+        }
+        throw e;
+    }
+
+    const [dateElement, timeElement, dayElement, locationElement] = await Promise.all([
+        page.$('#txtCiteDate'),
+        page.$('#txtCiteTime'),
+        page.$('#txtDayOftheWeek'),
+        page.$('#txtVioLocation')
+    ]);
+
+    if (!dateElement || !timeElement || !dayElement || !locationElement) {
+        console.error(`Unable to fetch data for citation #${citationNumber}`);
+        await browser.close();
+        return;
+    }
+
+    const date = await dateElement.evaluate(el => el.textContent);
+    const time = await timeElement.evaluate(el => el.textContent);
+    const day = await dayElement.evaluate(el => el.textContent);
+    const location = await locationElement.evaluate(el => el.textContent);
+
+    await db.collection('citations').doc(`${citationNumber}`).set({
+        citationDate: date,
+        citationTime: time,
+        citationDay: day,
+        citationLocation: location
+    });
+
+    await browser.close();
+    console.log(`Stored citation #${citationNumber}`);
 }
 
 async function startScraping(startingCitation, endingCitation) {
@@ -60,4 +73,4 @@ async function startScraping(startingCitation, endingCitation) {
     console.log('Scraping process completed.');
 }
 
-startScraping(400126027, 400127000);
+startScraping(400126136, 400126499);
