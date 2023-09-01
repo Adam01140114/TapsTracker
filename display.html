@@ -1,43 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<style type="text/css">
-    p {
-        margin-bottom: -1em;
-        margin-top: 0em;
-    }
-
-    #map {
-        border: 2px solid lightblue;
-        height: 700px;
-        width: 80%;
-        margin: 0px auto;
-    }
-
-    .citation {
-        width: fit-content;
-        background-color: #f0f0f0;
-        border-radius: 15px;
-        padding: 8px;
-        margin-bottom: 5px;
-        font-size: 0.9em;
-    }
-
-    #inOrder {
-        display: flex;
-        justify-content: space-around;
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        width: 100%;
-    }
-
-    .dayColumn {
-        margin: 5px;
-        min-width: 12%;
-        box-sizing: border-box;
-    }
-</style>
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -45,6 +8,47 @@
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD27CKLddswkn-DTg6anVo8BaRWUZJrHao&callback=initMap" async defer></script>
+
+    <style type="text/css">
+        p {
+            margin-bottom: -1em;
+            margin-top: 0em;
+        }
+
+        #map {
+            border: 2px solid lightblue;
+            height: 700px;
+            width: 80%;
+            margin: 0px auto;
+        }
+
+        .citation {
+            width: fit-content;
+            background-color: #f0f0f0;
+            border-radius: 15px;
+            padding: 8px;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        #inOrder {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            width: 100%;
+        }
+
+        .dayColumn {
+            margin: 5px;
+            min-width: 12%;
+            box-sizing: border-box;
+        }
+
+        #parking {
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 
 <body>
@@ -53,33 +57,36 @@
     </div>
     <center>
 	
-	<div>
+	
+	<center><h3>How Likely Is A Citation Near You?</h3></center>
+        <div>
             <select id="dayDropdown"></select>
             <select id="locationDropdown"></select>
             <button onclick="calculateLikelihood()">Calculate Likelihood</button>
             <p id="likelihoodResult"></p>
         </div>
-		
-		<br>
-
-		<h3><center>Recent Citations </h3>
-		
-		<div id="citationsList"></div>
-		<br>
-
+        <br>
+        <h3><center>Recent Citations</center></h3>
+        <div id="citationsList"></div>
+        <br>
         <button id="toggleCitations" onclick="toggleCitations()">Show All Citations</button>
-		<br><br>
-		<button onclick="centerMapToUser()">Show Citations Near Me</button>
-		<br>
-        <br>
-        <div id="map"></div>
-		<br>
-		
-        <br>
-        
-        
-        
         <br><br>
+        <button onclick="centerMapToUser()">Show Citations Near Me</button>
+        <br>
+
+		
+        <div id="parking">
+		
+			<h3><center> Where To Park On <select id="parkingDayDropdown" onchange="fetchParkingData()"></select> </h3> 
+            <h3>Top 10 Best Parking Locations</h3>
+            <div id="bestParkingList"></div> 
+            <h3>Top 10 Worst Parking Locations</h3>
+            <div id="worstParkingList"></div>
+            
+        </div>
+
+        <div id="map"></div>
+        <br>
         <div id="inOrder"></div>
     </center>
 
@@ -96,7 +103,6 @@
 
         const app = firebase.initializeApp(firebaseConfig);
         const db = app.firestore();
-
         let map;
         let allCitations = [];
 
@@ -107,7 +113,9 @@
             });
 
             populateDayDropdown();
+            populateParkingDayDropdown();
             fetchRecentCitations();
+			fetchParkingData();
         }
 
         function centerMapToUser() {
@@ -123,15 +131,6 @@
             const hour = parseInt(timeStr.slice(0, 2), 10);
             const minute = parseInt(timeStr.slice(2, 4), 10);
             return `${(hour % 12) || 12}:${minute.toString().padStart(2, '0')} ${hour >= 12 ? 'PM' : 'AM'}`;
-        }
-
-        function getOpacityBasedOnAge(timestamp) {
-            const now = new Date();
-            const citationDate = new Date(timestamp);
-            const diffTime = Math.abs(now - citationDate);
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            if (diffDays > 7) return 0;
-            return (7 - diffDays) / 7;
         }
 
         function toggleCitations() {
@@ -160,6 +159,20 @@
                 option.text = day;
                 if (idx === today) option.selected = true;
                 dayDropdown.appendChild(option);
+            });
+        }
+
+        function populateParkingDayDropdown() {
+            const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+            const parkingDayDropdown = document.getElementById('parkingDayDropdown');
+            const today = new Date().getDay();
+
+            dayNames.forEach((day, idx) => {
+                const option = document.createElement('option');
+                option.value = day;
+                option.text = day;
+                if (idx === today) option.selected = true;
+                parkingDayDropdown.appendChild(option);
             });
         }
 
@@ -233,6 +246,64 @@
             });
         }
 
+        async function fetchParkingData() {
+            const selectedDay = document.getElementById('parkingDayDropdown').value;
+            const querySnapshot = await db.collection("citations").get();
+
+            const locationCounts = {};
+            const dayCounts = {};
+
+            querySnapshot.forEach(doc => {
+                const data = doc.data();
+                const citationDate = new Date(data.timestamp);
+                const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+                const dayOfTheWeek = dayNames[citationDate.getDay()];
+
+                if (dayOfTheWeek === selectedDay) {
+                    if (!locationCounts[data.college]) {
+                        locationCounts[data.college] = 0;
+                    }
+                    locationCounts[data.college]++;
+                }
+
+                if (!dayCounts[dayOfTheWeek]) {
+                    dayCounts[dayOfTheWeek] = 0;
+                }
+                dayCounts[dayOfTheWeek]++;
+            });
+
+            const locationsArray = [];
+            for (let location in locationCounts) {
+                const percentage = (locationCounts[location] / dayCounts[selectedDay]) * 100;
+
+                locationsArray.push({ location, percentage });
+            }
+
+            locationsArray.sort((a, b) => b.percentage - a.percentage);
+
+            const worstParkingList = document.getElementById('worstParkingList');
+            const bestParkingList = document.getElementById('bestParkingList');
+            worstParkingList.innerHTML = '';
+            bestParkingList.innerHTML = '';
+
+            for (let i = 0; i < 10; i++) {
+                if (locationsArray[i]) {
+                    const worstItem = document.createElement("div");
+                    worstItem.textContent = `${locationsArray[i].location} - ${locationsArray[i].percentage.toFixed(2)}%`;
+                    worstParkingList.appendChild(worstItem);
+                }
+
+                if (locationsArray[locationsArray.length - 1 - i]) {
+                    const bestItem = document.createElement("div");
+                    bestItem.textContent = `${locationsArray[locationsArray.length - 1 - i].location} - ${locationsArray[locationsArray.length - 1 - i].percentage.toFixed(2)}%`;
+                    bestParkingList.appendChild(bestItem);
+                }
+            }
+        }
+		
+		
+		fetchParkingData();
+
         function calculateLikelihood() {
     const daySelected = document.getElementById('dayDropdown').value;
     const locationSelected = document.getElementById('locationDropdown').value;
@@ -250,6 +321,9 @@
     let likelihood = (matchedCitations.length / citationsForSelectedDay.length) * 100;
     document.getElementById('likelihoodResult').textContent = `Likelihood of citation on ${daySelected} at ${locationSelected} is ${likelihood.toFixed(2)}%`;
 }
+
+
+
 
     </script>
 </body>
