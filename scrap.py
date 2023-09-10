@@ -58,7 +58,7 @@ def main():
     # Set up the Selenium driver
     driver = webdriver.Chrome()
 
-    base_citation_number = 399129416
+    base_citation_number = 366137262
     while True:
         details = get_citation_details(base_citation_number, driver)
         
