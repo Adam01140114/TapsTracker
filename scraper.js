@@ -76,4 +76,4 @@ async function startScraping(startingCitation, endingCitation) {
     console.log('Scraping process completed.');
 }
 
-startScraping(400126062, 400126136);
+startScraping(366123456, 400127499);
