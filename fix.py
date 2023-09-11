@@ -1,4 +1,5 @@
 import os
+import re
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException, ElementNotInteractableException
@@ -12,6 +13,24 @@ BASE_URL = "https://www.paymycite.com/SearchAgency.aspx?agency=147&plate=&cite="
 cred = credentials.Certificate('defundtaps-firebase-adminsdk-l7ji6-497e092431.json')
 firebase_admin.initialize_app(cred)
 db = firestore.client()
+
+def ticket_exists(id):
+    parameters = {'agency': 147, 'plate': '', 'cite': id}
+    r = requests.get(url=URL, params=parameters)
+    return not (r.text.__contains__('Sorry'))
+
+def get_ticket_id(cdn, number):
+    return (cdn) * 1000000 + number
+
+def format_time(cite_time):
+    # Use regular expressions to extract hours and minutes from the time
+    match = re.search(r'(\d+):(\d+)\s+(AM|PM)', cite_time)
+    if match:
+        hours, minutes, am_pm = match.groups()
+        if am_pm == 'PM' and hours != '12':
+            hours = str(int(hours) + 12)
+        return f"{hours}{minutes}"
+    return None
 
 def get_citation_details(citation_number, driver):
     driver.get(BASE_URL + str(citation_number))
@@ -35,7 +54,13 @@ def get_citation_details(citation_number, driver):
         cite_time = soup.find("span", {"id": "txtCiteTime"}).text.strip()
         cite_location = soup.find("span", {"id": "txtVioLocation"}).text.strip()
 
-        return cite_number, cite_date, cite_time, cite_location
+        # Format the time
+        formatted_time = format_time(cite_time)
+
+        if formatted_time is not None:
+            return cite_number, cite_date, formatted_time, cite_location
+        else:
+            return f"Invalid time format for citation {cite_number}"
 
     except NoSuchElementException:
         return f"Citation number {citation_number} doesn't have a button"
@@ -59,12 +84,7 @@ def main():
 
     # Read the valid citation ranges from the output of citations.py
     valid_ranges = [
-        (255123456, 255123456),
-        (366123456, 366137262),
-        (377123456, 377128241),
-        (388123456, 388127706),
-        (399123456, 399129426),
-        (400123456, 400126499)
+        (388123846, 388123847)
     ]
 
     for start, end in valid_ranges:

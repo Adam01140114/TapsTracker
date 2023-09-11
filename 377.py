@@ -1,4 +1,5 @@
 import os
+import re
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException, ElementNotInteractableException
@@ -32,10 +33,21 @@ def get_citation_details(citation_number, driver):
         # Extract required data
         cite_number = soup.find("span", {"id": "txtCiteNumber"}).text.strip()
         cite_date = soup.find("span", {"id": "txtCiteDate"}).text.strip()
-        cite_time = soup.find("span", {"id": "txtCiteTime"}).text.strip()
+
+        # Extract the time directly from the span and format it
+        cite_time_span = soup.find("span", {"id": "txtCiteTime"})
+        if cite_time_span:
+            cite_time_text = cite_time_span.text.strip()
+            formatted_time = re.sub(r'\D', '', cite_time_text)  # Extract digits and remove non-numeric characters
+        else:
+            formatted_time = None
+
         cite_location = soup.find("span", {"id": "txtVioLocation"}).text.strip()
 
-        return cite_number, cite_date, cite_time, cite_location
+        if formatted_time is not None:
+            return cite_number, cite_date, formatted_time, cite_location
+        else:
+            return f"Invalid time format for citation {cite_number}"
 
     except NoSuchElementException:
         return f"Citation number {citation_number} doesn't have a button"
@@ -59,12 +71,7 @@ def main():
 
     # Read the valid citation ranges from the output of citations.py
     valid_ranges = [
-        (255123456, 255123456),
-        (366123456, 366137262),
-        (377123456, 377128241),
-        (388123456, 388127706),
-        (399123456, 399129426),
-        (400123456, 400126499)
+        (377124857, 377128241)
     ]
 
     for start, end in valid_ranges:

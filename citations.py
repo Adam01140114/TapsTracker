@@ -40,7 +40,7 @@ for s in series:
         max = threedigit + current
         
 
-    print("Check citations " + str(min) + "-" + str(max))
+    print("(" + str(min) + "," + str(max) + "),")
 
     
     if min == 255123456:
@@ -71,9 +71,10 @@ for s in series:
 
     
     
-    f=open("latest.txt", "a")
-    f.write(f"{s}: {current}, {get_ticket_date(get_ticket_id(s, current))}\n")
+    f = open("latest.txt", "a")
+    f.write(f"{s},{current},{max}\n")
     f.close()
+
 
 
 
