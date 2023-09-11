@@ -48,6 +48,32 @@
         #parking {
             margin-bottom: 20px;
         }
+		
+		#near {
+            border: 2px solid lightblue;
+            width: fit-content;
+            padding: 5px;
+            border-radius: 0px;
+            margin-top: 10px;
+        }
+		
+		#recent {
+            border: 2px solid lightblue;
+            width: fit-content;
+            padding: 5px;
+            border-radius: 0px;
+            margin-top: 10px;
+        }
+		
+		#parking {
+            border: 2px solid lightblue;
+            width: fit-content;
+            padding: 5px;
+            border-radius: 0px;
+            margin-top: 10px;
+        }
+		
+		
     </style>
 </head>
 
@@ -58,6 +84,7 @@
     <center>
 	
 	
+	<div id="near">
 	<center><h3>How Likely Is A Citation Near You?</h3></center>
         <div>
             <select id="dayDropdown"></select>
@@ -65,14 +92,18 @@
             <button onclick="calculateLikelihood()">Calculate Likelihood</button>
             <p id="likelihoodResult"></p>
         </div>
-        <br>
+        <br><br>
+	</div>
+	
+	
+	<div id="recent">
         <h3><center>Recent Citations</center></h3>
         <div id="citationsList"></div>
         <br>
         <button id="toggleCitations" onclick="toggleCitations()">Show All Citations</button>
         <br><br>
-        <button onclick="centerMapToUser()">Show Citations Near Me</button>
-        <br>
+        
+	</div>
 
 		
         <div id="parking">
@@ -87,6 +118,9 @@
 
         <div id="map"></div>
         <br>
+		<button onclick="centerMapToUser()">Show Citations Near Me</button>
+        <br>
+		
         <div id="inOrder"></div>
     </center>
 
@@ -319,7 +353,15 @@
     let matchedCitations = Array.from(citationsForSelectedDay).filter(citation => citation.textContent.includes(locationSelected));
     
     let likelihood = (matchedCitations.length / citationsForSelectedDay.length) * 100;
-    document.getElementById('likelihoodResult').textContent = `Likelihood of citation on ${daySelected} at ${locationSelected} is ${likelihood.toFixed(2)}%`;
+    
+	var likelihoodResult = document.getElementById('likelihoodResult');
+var lineBreak = document.createElement('br');
+likelihoodResult.appendChild(lineBreak);
+likelihoodResult.appendChild(document.createTextNode(`Likelihood of citation on ${daySelected} at ${locationSelected} is ${likelihood.toFixed(2)}%`));
+
+
+
+	//document.getElementById('likelihoodResult').textContent = `Likelihood of citation on ${daySelected} at ${locationSelected} is ${likelihood.toFixed(2)}%`;
 }
 
 
