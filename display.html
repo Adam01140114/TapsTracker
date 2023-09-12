@@ -48,32 +48,22 @@
         #parking {
             margin-bottom: 20px;
         }
-		
-		#near {
+
+        #near, #recent, #parking {
             border: 2px solid lightblue;
-            width: fit-content;
+            width: 30%;
             padding: 5px;
             border-radius: 0px;
             margin-top: 10px;
+            display: inline-block;
+            vertical-align: top;
         }
-		
-		#recent {
-            border: 2px solid lightblue;
-            width: fit-content;
-            padding: 5px;
-            border-radius: 0px;
-            margin-top: 10px;
+
+        #near select,
+        #recent select,
+        #parking select {
+            width: 100%;
         }
-		
-		#parking {
-            border: 2px solid lightblue;
-            width: fit-content;
-            padding: 5px;
-            border-radius: 0px;
-            margin-top: 10px;
-        }
-		
-		
     </style>
 </head>
 
@@ -82,57 +72,61 @@
         <h1><center>Taps Tracker</center></h1>
     </div>
     <center>
-	
-	
-	<div id="near">
-	<center><h3>How Likely Is A Citation Near You?</h3></center>
-        <div>
-            <select id="dayDropdown"></select>
-            <select id="locationDropdown"></select>
-            <button onclick="calculateLikelihood()">Calculate Likelihood</button>
-            <p id="likelihoodResult"></p>
+        <div id="near">
+            <center>
+                <h3>How Likely Is A Citation Near You?</h3>
+            </center>
+            <div>
+                <select id="dayDropdown"></select>
+                <br><br>
+                <select id="locationDropdown"></select>
+                <br><br>
+                <button onclick="calculateLikelihood()">Calculate Likelihood</button>
+                <p id="likelihoodResult"></p>
+                <br>
+            </div>
+            <br><br>
         </div>
-        <br><br>
-	</div>
-	
-	
-	<div id="recent">
-        <h3><center>Recent Citations</center></h3>
-        <div id="citationsList"></div>
-        <br>
-        <button id="toggleCitations" onclick="toggleCitations()">Show All Citations</button>
-        <br><br>
-        
-	</div>
 
-		
+
+        <div id="recent">
+            <h3><center>Recent Citations</center></h3>
+			<button id="toggleCitations" onclick="toggleCitations()">Show All Citations</button>
+			<br>
+            <div id="citationsList"></div>
+			
+            <br>
+            
+            <br><br>
+        </div>
+
         <div id="parking">
-		
-			<h3><center> Where To Park On <select id="parkingDayDropdown" onchange="fetchParkingData()"></select> </h3> 
+
+            <h3><center> Where To Park On <select id="parkingDayDropdown" onchange="fetchParkingData()"></select> </h3>
             <h3>Top 10 Best Parking Locations</h3>
-            <div id="bestParkingList"></div> 
+            <div id="bestParkingList"></div>
             <h3>Top 10 Worst Parking Locations</h3>
             <div id="worstParkingList"></div>
-            
+
         </div>
 
         <div id="map"></div>
         <br>
-		<button onclick="centerMapToUser()">Show Citations Near Me</button>
+        <button onclick="centerMapToUser()">Show Citations Near Me</button>
         <br>
-		
+
         <div id="inOrder"></div>
     </center>
 
     <script>
         var firebaseConfig = {
-            apiKey: "AIzaSyAgYdoZnSv5ekxngv_ue61aFZUGcRlphok",
-            authDomain: "defundtaps.firebaseapp.com",
-            projectId: "defundtaps",
-            storageBucket: "defundtaps.appspot.com",
-            messagingSenderId: "456064481827",
-            appId: "1:456064481827:web:4a4b37035fbfbd534ccf96",
-            measurementId: "G-4ZX480FN46"
+            apiKey: "AIzaSyDlyN4o_t0tjjqpJeV2Zc4NmGYBcaT6bO4",
+  authDomain: "destroy-taps.firebaseapp.com",
+  projectId: "destroy-taps",
+  storageBucket: "destroy-taps.appspot.com",
+  messagingSenderId: "582503154101",
+  appId: "1:582503154101:web:a086290519eec9e4acd9fc",
+  measurementId: "G-KM239GX0DP"
         };
 
         const app = firebase.initializeApp(firebaseConfig);
@@ -149,7 +143,7 @@
             populateDayDropdown();
             populateParkingDayDropdown();
             fetchRecentCitations();
-			fetchParkingData();
+            fetchParkingData();
         }
 
         function centerMapToUser() {
@@ -171,14 +165,15 @@
             const btn = document.getElementById('toggleCitations');
             const list = document.getElementById('citationsList');
             list.innerHTML = '';
-            if (btn.innerText === "Show All") {
-                allCitations.forEach(citation => list.appendChild(citation.cloneNode(true)));
-                btn.innerText = "Show Less";
-            } else {
+
+            if (btn.innerText === "Show Less") {
                 for (let i = 0; i < 5; i++) {
                     list.appendChild(allCitations[i].cloneNode(true));
                 }
                 btn.innerText = "Show All";
+            } else {
+                allCitations.forEach(citation => list.appendChild(citation.cloneNode(true)));
+                btn.innerText = "Show Less";
             }
         }
 
@@ -257,6 +252,7 @@
 
             // Displaying sorted citations
             const inOrderDiv = document.getElementById('inOrder');
+            inOrderDiv.innerHTML = '';
             for (let day in daySortedCitations) {
                 const dayColumnDiv = document.createElement("div");
                 dayColumnDiv.classList.add('dayColumn');
@@ -334,39 +330,32 @@
                 }
             }
         }
-		
-		
-		fetchParkingData();
 
         function calculateLikelihood() {
-    const daySelected = document.getElementById('dayDropdown').value;
-    const locationSelected = document.getElementById('locationDropdown').value;
+            const daySelected = document.getElementById('dayDropdown').value;
+            const locationSelected = document.getElementById('locationDropdown').value;
 
-    const dayColumns = document.querySelectorAll('.dayColumn');
-    let citationsForSelectedDay = [];
-    dayColumns.forEach(dayColumn => {
-        if (dayColumn.querySelector('h3').textContent === daySelected) {
-            citationsForSelectedDay = dayColumn.querySelectorAll('.citation');
+            const dayColumns = document.querySelectorAll('.dayColumn');
+            let citationsForSelectedDay = [];
+            dayColumns.forEach(dayColumn => {
+                if (dayColumn.querySelector('h3').textContent === daySelected) {
+                    citationsForSelectedDay = dayColumn.querySelectorAll('.citation');
+                }
+            });
+
+            let matchedCitations = Array.from(citationsForSelectedDay).filter(citation => citation.textContent.includes(locationSelected));
+
+            let likelihood = (matchedCitations.length / citationsForSelectedDay.length) * 100;
+
+            var likelihoodResult = document.getElementById('likelihoodResult');
+            var lineBreak = document.createElement('br');
+            likelihoodResult.innerHTML = '';
+            likelihoodResult.appendChild(lineBreak);
+            likelihoodResult.appendChild(document.createTextNode(`Likelihood of citation on ${daySelected} at ${locationSelected} is ${likelihood.toFixed(2)}%`));
         }
-    });
-
-    let matchedCitations = Array.from(citationsForSelectedDay).filter(citation => citation.textContent.includes(locationSelected));
-    
-    let likelihood = (matchedCitations.length / citationsForSelectedDay.length) * 100;
-    
-	var likelihoodResult = document.getElementById('likelihoodResult');
-var lineBreak = document.createElement('br');
-likelihoodResult.appendChild(lineBreak);
-likelihoodResult.appendChild(document.createTextNode(`Likelihood of citation on ${daySelected} at ${locationSelected} is ${likelihood.toFixed(2)}%`));
-
-
-
-	//document.getElementById('likelihoodResult').textContent = `Likelihood of citation on ${daySelected} at ${locationSelected} is ${likelihood.toFixed(2)}%`;
-}
-
-
-
-
+		
+        // Initialize the map and fetch initial data
+        initMap();
     </script>
 </body>
 

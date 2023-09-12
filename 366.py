@@ -71,7 +71,7 @@ def main():
 
     # Read the valid citation ranges from the output of citations.py
     valid_ranges = [
-        (399123456, 399129426)
+        (366123456, 366137262)
     ]
 
     for start, end in valid_ranges:

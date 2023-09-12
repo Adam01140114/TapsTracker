@@ -10,7 +10,7 @@ from firebase_admin import credentials, firestore
 BASE_URL = "https://www.paymycite.com/SearchAgency.aspx?agency=147&plate=&cite="
 
 # Firebase initialization
-cred = credentials.Certificate('defundtaps-firebase-adminsdk-l7ji6-497e092431.json')
+cred = credentials.Certificate('destroy-taps-firebase-adminsdk-qmafk-d3322c4a8c.json')
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
@@ -71,7 +71,7 @@ def main():
 
     # Read the valid citation ranges from the output of citations.py
     valid_ranges = [
-        (388127721, 388127726)
+        (388123456, 388127730)
     ]
 
     for start, end in valid_ranges:
