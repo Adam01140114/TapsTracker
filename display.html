@@ -7,7 +7,8 @@
     <title>Taps Tracker</title>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD27CKLddswkn-DTg6anVo8BaRWUZJrHao&callback=initMap" async defer></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD27CKLddswkn-DTg6anVo8BaRWUZJrHao&callback=initMap"
+        async defer></script>
 
     <style type="text/css">
         p {
@@ -91,12 +92,10 @@
 
         <div id="recent">
             <h3><center>Recent Citations</center></h3>
-			<button id="toggleCitations" onclick="toggleCitations()">Show All Citations</button>
-			<br>
-            <div id="citationsList"></div>
-			
+            <button id="toggleCitations" onclick="toggleCitations()">Show All Citations</button>
             <br>
-            
+            <div id="citationsList"></div>
+            <br>
             <br><br>
         </div>
 
@@ -178,7 +177,7 @@
         }
 
         function populateDayDropdown() {
-            const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+            const dayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
             const dayDropdown = document.getElementById('dayDropdown');
             const today = new Date().getDay();
 
@@ -192,7 +191,7 @@
         }
 
         function populateParkingDayDropdown() {
-            const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+            const dayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
             const parkingDayDropdown = document.getElementById('parkingDayDropdown');
             const today = new Date().getDay();
 
@@ -218,8 +217,7 @@
                 "Wednesday": [],
                 "Thursday": [],
                 "Friday": [],
-                "Saturday": [],
-                "Sunday": []
+                "Saturday": []
             };
 
             querySnapshot.forEach(doc => {
@@ -254,15 +252,17 @@
             const inOrderDiv = document.getElementById('inOrder');
             inOrderDiv.innerHTML = '';
             for (let day in daySortedCitations) {
-                const dayColumnDiv = document.createElement("div");
-                dayColumnDiv.classList.add('dayColumn');
-                const dayHeader = document.createElement("h3");
-                dayHeader.textContent = day;
-                dayColumnDiv.appendChild(dayHeader);
-                daySortedCitations[day].forEach(citationDiv => {
-                    dayColumnDiv.appendChild(citationDiv.cloneNode(true));
-                });
-                inOrderDiv.appendChild(dayColumnDiv);
+                if (day !== "Sunday") { // Add this condition
+                    const dayColumnDiv = document.createElement("div");
+                    dayColumnDiv.classList.add('dayColumn');
+                    const dayHeader = document.createElement("h3");
+                    dayHeader.textContent = day;
+                    dayColumnDiv.appendChild(dayHeader);
+                    daySortedCitations[day].forEach(citationDiv => {
+                        dayColumnDiv.appendChild(citationDiv.cloneNode(true));
+                    });
+                    inOrderDiv.appendChild(dayColumnDiv);
+                }
             }
 
             // Populating location dropdown
@@ -353,7 +353,7 @@
             likelihoodResult.appendChild(lineBreak);
             likelihoodResult.appendChild(document.createTextNode(`Likelihood of citation on ${daySelected} at ${locationSelected} is ${likelihood.toFixed(2)}%`));
         }
-		
+
         // Initialize the map and fetch initial data
         initMap();
     </script>
